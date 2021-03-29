@@ -1,5 +1,5 @@
 {
-	"name": "mg/monolog",
+	"name": "mallgroup/monolog",
 	"type": "library",
 	"description": "Integration of Monolog into Nette Framework",
 	"keywords": ["nette", "monolog", "logging", "diagnostics"],
