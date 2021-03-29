@@ -1,14 +1,14 @@
 MG/Monolog
 ======
 
-[![Build Status](https://travis-ci.org/mall/Monolog.svg?branch=master)](https://travis-ci.org/MG/Monolog)
-[![Downloads this Month](https://img.shields.io/packagist/dm/MG/monolog.svg)](https://packagist.org/packages/MG/monolog)
-[![Latest stable](https://img.shields.io/packagist/v/MG/monolog.svg)](https://packagist.org/packages/MG/monolog)
-[![Coverage Status](https://coveralls.io/repos/github/MG/Monolog/badge.svg?branch=master)](https://coveralls.io/github/MG/Monolog?branch=master)
+[![Build Status](https://travis-ci.org/mallgroup/monolog.svg?branch=master)](https://travis-ci.org/mallgroup/monolog)
+[![Downloads this Month](https://img.shields.io/packagist/dm/mg/monolog.svg)](https://packagist.org/packages/mg/monolog)
+[![Latest stable](https://img.shields.io/packagist/v/mg/monolog.svg)](https://packagist.org/packages/mg/monolog)
+[![Coverage Status](https://coveralls.io/repos/github/mallgroup/monolog/badge.svg?branch=master)](https://coveralls.io/github/mallgroup/monolog?branch=master)
 
 Integration of [Monolog](https://github.com/Seldaek/monolog) into Nette Framework
 
-This is Fork of Kdyby/Monolog, licensed under new-BSD license
+This is Fork of [Kdyby/Monolog](https://github.com/kdyby/monolog), licensed under new-BSD license
 
 Installation
 ------------
@@ -22,5 +22,5 @@ $ composer require mg/monolog
 Documentation
 ------------
 
-Learn more in [documentation](https://github.com/mallgroup/Monolog/blob/master/docs/en/index.md).
+Learn more in [documentation](https://github.com/mallgroup/monolog/blob/master/docs/en/index.md).
 

@@ -6,7 +6,7 @@
 	"license": ["BSD-3-Clause"],
 	"authors": [
 		{
-			"name": "Radovan Kepák",
+			"name": "Mall Group",
 			"email": "radovan.kepak@mallgroup.com",
 			"homepage": "https://mallgroup.com"
 		},
@@ -56,7 +56,10 @@
 	},
 	"extra": {
 		"branch-alias": {
-			"dev-master": "2.0-dev"
+			"dev-master": "1.0-dev"
 		}
+	},
+	"replace": {
+		"kdyby/rabbitmq": "*"
 	}
 }
