@@ -36,6 +36,10 @@ class FallbackNetteHandler extends \Monolog\Handler\ErrorLogHandler
 		$this->priorityFormatter = new LineFormatter('[%datetime%] %level_name%: %message% %context% %extra%');
 	}
 
+	/**
+	 * @param array<string,mixed> $record
+	 * @return bool
+	 */
 	public function handle(array $record): bool
 	{
 		if ($record['channel'] === $this->appName) {
@@ -51,7 +55,7 @@ class FallbackNetteHandler extends \Monolog\Handler\ErrorLogHandler
 	}
 
 	/**
-	 * {@inheritdoc}
+	 * @param array<string,mixed> $record
 	 */
 	protected function write(array $record): void
 	{

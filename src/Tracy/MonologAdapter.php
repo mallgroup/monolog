@@ -24,6 +24,10 @@ class MonologAdapter extends Logger
 	use SmartObject;
 
 	public const ACCESS = 'access';
+
+	/**
+	 * @var array<string,int>
+	 */
 	private array $priorityMap = [
 		self::DEBUG => MonologLogger::DEBUG,
 		self::INFO => MonologLogger::INFO,
@@ -54,6 +58,11 @@ class MonologAdapter extends Logger
 		return $this->blueScreenRenderer->getExceptionFile($exception);
 	}
 
+	/**
+	 * @param string|\Throwable $message
+	 * @param string $level
+	 * @return string|null
+	 */
 	public function log($message, $level = self::INFO): ?string
 	{
 		$formattedMessage = self::formatMessage($message);
@@ -66,9 +75,7 @@ class MonologAdapter extends Logger
 			$context['exception'] = $message;
 		}
 
-		$exceptionFile = ($message instanceof \Throwable || $message instanceof \Exception)
-			? $this->getExceptionFile($message)
-			: NULL;
+		$exceptionFile = $message instanceof \Throwable ? $this->getExceptionFile($message) : NULL;
 
 		if ($this->email !== NULL && $this->mailer !== NULL && in_array($level, [self::ERROR, self::EXCEPTION, self::CRITICAL], TRUE)) {
 			$this->sendEmail(implode(' ', [

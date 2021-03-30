@@ -24,6 +24,10 @@ class TracyExceptionProcessor
 		$this->blueScreenRenderer = $blueScreenRenderer;
 	}
 
+	/**
+	 * @param array<string,mixed> $record
+	 * @return array<string,mixed>
+	 */
 	public function __invoke(array $record): array
 	{
 		if (!$this->isHandling($record)) {
@@ -42,6 +46,10 @@ class TracyExceptionProcessor
 		return $record;
 	}
 
+	/**
+	 * @param array<string,mixed> $record
+	 * @return bool
+	 */
 	public function isHandling(array $record): bool
 	{
 		return !isset($record['context']['tracy'])

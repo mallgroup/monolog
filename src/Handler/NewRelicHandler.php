@@ -9,13 +9,17 @@
 
 namespace MG\Monolog\Handler;
 
+use Monolog\Handler\MissingExtensionException;
+use Nette\SmartObject;
+
 class NewRelicHandler extends \Monolog\Handler\NewRelicHandler
 {
 
-	use \Nette\SmartObject;
+	use SmartObject;
 
 	/**
-	 * {@inheritdoc}
+	 * @param array<string,mixed> $record
+	 * @throws MissingExtensionException
 	 */
 	protected function write(array $record): void
 	{
@@ -27,7 +31,8 @@ class NewRelicHandler extends \Monolog\Handler\NewRelicHandler
 	}
 
 	/**
-	 * {@inheritdoc}
+	 * @param array<string,mixed> $record
+	 * @return bool
 	 */
 	public function isHandling(array $record): bool
 	{

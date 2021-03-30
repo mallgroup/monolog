@@ -10,6 +10,7 @@
 namespace MG\Monolog\Processor;
 
 use Monolog\Logger as MonologLogger;
+use Nette\SmartObject;
 
 /**
  * Helps you change the channel name of the record,
@@ -18,9 +19,13 @@ use Monolog\Logger as MonologLogger;
 class PriorityProcessor
 {
 
-	use \Nette\SmartObject;
+	use SmartObject;
 
-	public function __invoke($record)
+	/**
+	 * @param array<string,mixed> $record
+	 * @return array<string,mixed>
+	 */
+	public function __invoke(array $record): array
 	{
 		if (isset($record['context']['channel'])) {
 			$record['channel'] = $record['context']['channel'];

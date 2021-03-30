@@ -23,6 +23,7 @@ use Nette\DI\Config\Helpers;
 use Nette\DI\ContainerBuilder;
 use Nette\DI\Helpers as DIHelpers;
 use Nette\DI\Statement;
+use Nette\DI\Definitions;
 use Nette\PhpGenerator\ClassType as ClassTypeGenerator;
 use Nette\PhpGenerator\Closure;
 use Nette\PhpGenerator\PhpLiteral;
@@ -43,6 +44,7 @@ class MonologExtension extends CompilerExtension
 	public const TAG_PROCESSOR = 'monolog.processor';
 	public const TAG_PRIORITY = 'monolog.priority';
 
+	/** @var array<string,mixed> */
 	private array $defaults = [
 		'handlers' => [],
 		'processors' => [],
@@ -57,6 +59,7 @@ class MonologExtension extends CompilerExtension
 	public function loadConfiguration(): void
 	{
 		$builder = $this->getContainerBuilder();
+		/** @var array<string,mixed> $config */
 		$config = Helpers::merge($this->config, $this->defaults);
 		$config['logDir'] = self::resolveLogDir($builder->parameters);
 		self::createDirectory($config['logDir']);
@@ -102,6 +105,9 @@ class MonologExtension extends CompilerExtension
 		$this->setConfig($config);
 	}
 
+	/**
+	 * @param array<string,mixed> $config
+	 */
 	protected function loadHandlers(array $config): void
 	{
 		$builder = $this->getContainerBuilder();
@@ -116,6 +122,9 @@ class MonologExtension extends CompilerExtension
 		}
 	}
 
+	/**
+	 * @param array<string,mixed> $config
+	 */
 	protected function loadProcessors(array $config): void
 	{
 		$builder = $this->getContainerBuilder();
@@ -153,6 +162,12 @@ class MonologExtension extends CompilerExtension
 		}
 	}
 
+	/**
+	 * @param ContainerBuilder $builder
+	 * @param string|int $processorName
+	 * @param Statement $implementation
+	 * @return string
+	 */
 	protected function loadDefinitions(ContainerBuilder $builder, $processorName, $implementation): string {
 		if (method_exists($this->compiler, 'loadDefinitionsFromConfig')) {
 			$this->compiler->loadDefinitionsFromConfig([
@@ -197,7 +212,11 @@ class MonologExtension extends CompilerExtension
 		}
 	}
 
-	protected function findByTagSorted($tag): array
+	/**
+	 * @param string $tag
+	 * @return array<string,bool>
+	 */
+	protected function findByTagSorted(string $tag): array
 	{
 		$builder = $this->getContainerBuilder();
 
@@ -230,6 +249,10 @@ class MonologExtension extends CompilerExtension
 		};
 	}
 
+	/**
+	 * @param array<string,mixed> $parameters
+	 * @return string
+	 */
 	private static function resolveLogDir(array $parameters): string
 	{
 		if (isset($parameters['logDir'])) {

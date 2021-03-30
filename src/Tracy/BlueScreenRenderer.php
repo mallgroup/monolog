@@ -20,7 +20,7 @@ class BlueScreenRenderer extends Logger
 
 	use SmartObject;
 
-	public function __construct($directory, BlueScreen $blueScreen)
+	public function __construct(string $directory, BlueScreen $blueScreen)
 	{
 		parent::__construct($directory, NULL, $blueScreen);
 	}

@@ -31,7 +31,7 @@ class Logger extends \Monolog\Logger
 	 * This method allows for compatibility with common interfaces.
 	 *
 	 * @param string $message The log message
-	 * @param array  $context The log context
+	 * @param array<string,mixed> $context The log context
 	 */
 	public function addDebug(string $message, array $context = []): void
 	{
@@ -44,7 +44,7 @@ class Logger extends \Monolog\Logger
 	 * This method allows for compatibility with common interfaces.
 	 *
 	 * @param string $message The log message
-	 * @param array  $context The log context
+	 * @param array<string,mixed> $context The log context
 	 */
 	public function addInfo(string $message, array $context = []): void
 	{
@@ -57,7 +57,7 @@ class Logger extends \Monolog\Logger
 	 * This method allows for compatibility with common interfaces.
 	 *
 	 * @param string $message The log message
-	 * @param array  $context The log context
+	 * @param array<string,mixed> $context The log context
 	 */
 	public function addNotice(string $message, array $context = []): void
 	{
@@ -70,7 +70,7 @@ class Logger extends \Monolog\Logger
 	 * This method allows for compatibility with common interfaces.
 	 *
 	 * @param string $message The log message
-	 * @param array  $context The log context
+	 * @param array<string,mixed> $context The log context
 	 */
 	public function addWarning(string $message, array $context = []): void
 	{
@@ -83,7 +83,7 @@ class Logger extends \Monolog\Logger
 	 * This method allows for compatibility with common interfaces.
 	 *
 	 * @param string $message The log message
-	 * @param array  $context The log context
+	 * @param array<string,mixed> $context The log context
 	 */
 	public function addError(string $message, array $context = []): void
 	{
@@ -96,7 +96,7 @@ class Logger extends \Monolog\Logger
 	 * This method allows for compatibility with common interfaces.
 	 *
 	 * @param string $message The log message
-	 * @param array  $context The log context
+	 * @param array<string,mixed> $context The log context
 	 */
 	public function addCritical(string $message, array $context = []): void
 	{
@@ -109,7 +109,7 @@ class Logger extends \Monolog\Logger
 	 * This method allows for compatibility with common interfaces.
 	 *
 	 * @param string $message The log message
-	 * @param array  $context The log context
+	 * @param array<string,mixed> $context The log context
 	 */
 	public function addAlert(string $message, array $context = []): void
 	{
@@ -122,7 +122,7 @@ class Logger extends \Monolog\Logger
 	 * This method allows for compatibility with common interfaces.
 	 *
 	 * @param string $message The log message
-	 * @param array  $context The log context
+	 * @param array<string,mixed> $context The log context
 	 */
 	public function addEmergency(string $message, array $context = []): void
 	{
@@ -135,7 +135,7 @@ class Logger extends \Monolog\Logger
 	 * This method allows for compatibility with common interfaces.
 	 *
 	 * @param string $message The log message
-	 * @param array  $context The log context
+	 * @param array<string,mixed> $context The log context
 	 */
 	public function warn(string $message, array $context = []): void
 	{
@@ -148,7 +148,7 @@ class Logger extends \Monolog\Logger
 	 * This method allows for compatibility with common interfaces.
 	 *
 	 * @param string $message The log message
-	 * @param array  $context The log context
+	 * @param array<string,mixed> $context The log context
 	 */
 	public function err(string $message, array $context = []): void
 	{
@@ -161,7 +161,7 @@ class Logger extends \Monolog\Logger
 	 * This method allows for compatibility with common interfaces.
 	 *
 	 * @param string $message The log message
-	 * @param array  $context The log context
+	 * @param array<string,mixed> $context The log context
 	 */
 	public function crit(string $message, array $context = []): void
 	{
@@ -174,7 +174,7 @@ class Logger extends \Monolog\Logger
 	 * This method allows for compatibility with common interfaces.
 	 *
 	 * @param string $message The log message
-	 * @param array  $context The log context
+	 * @param array<string,mixed> $context The log context
 	 */
 	public function emerg(string $message, array $context = []): void
 	{

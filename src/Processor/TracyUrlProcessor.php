@@ -10,29 +10,27 @@
 namespace MG\Monolog\Processor;
 
 use MG\Monolog\Tracy\BlueScreenRenderer;
+use Nette\SmartObject;
 
 class TracyUrlProcessor
 {
 
-	use \Nette\SmartObject;
+	use SmartObject;
 
-	/**
-	 * @var string
-	 */
-	private $baseUrl;
+	private string $baseUrl;
+	private BlueScreenRenderer $blueScreenRenderer;
 
-	/**
-	 * @var \MG\Monolog\Tracy\BlueScreenRenderer
-	 */
-	private $blueScreenRenderer;
-
-	public function __construct($baseUrl, BlueScreenRenderer $blueScreenRenderer)
+	public function __construct(string $baseUrl, BlueScreenRenderer $blueScreenRenderer)
 	{
 		$this->baseUrl = rtrim($baseUrl, '/');
 		$this->blueScreenRenderer = $blueScreenRenderer;
 	}
 
-	public function __invoke(array $record)
+	/**
+	 * @param array<string,mixed> $record
+	 * @return array<string,mixed>
+	 */
+	public function __invoke(array $record): array
 	{
 		if ($this->isHandling($record)) {
 			$exceptionFile = $this->blueScreenRenderer->getExceptionFile($record['context']['exception']);
@@ -42,10 +40,13 @@ class TracyUrlProcessor
 		return $record;
 	}
 
+	/**
+	 * @param array<string,mixed> $record
+	 * @return bool
+	 */
 	public function isHandling(array $record): bool
 	{
-		return isset($record['context']['exception'])
-			&& ($record['context']['exception'] instanceof \Throwable || $record['context']['exception'] instanceof \Exception);
+		return isset($record['context']['exception']) && ($record['context']['exception'] instanceof \Throwable);
 	}
 
 }
