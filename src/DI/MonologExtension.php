@@ -113,10 +113,8 @@ class MonologExtension extends CompilerExtension
 		$builder = $this->getContainerBuilder();
 
 		foreach ($config['handlers'] as $handlerName => $implementation) {
-
-			$builder->addDefinition($this->prefix('handler.' . $handlerName))
-				->setFactory($implementation)
-				->setAutowired(FALSE)
+			$serviceName = $this->loadDefinitions($builder, $handlerName, $implementation);
+			$builder->getDefinition($serviceName)
 				->addTag(self::TAG_HANDLER)
 				->addTag(self::TAG_PRIORITY, is_numeric($handlerName) ? $handlerName : 0);
 		}
