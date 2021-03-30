@@ -1,10 +1,9 @@
 MallGroup/Monolog
 ======
 
-[![Build Status](https://travis-ci.org/mallgroup/monolog.svg?branch=master)](https://travis-ci.org/mallgroup/monolog)
+[![Build Status](https://github.com/mallgroup/monolog/workflows/Tests/badge.svg?branch=master)](https://travis-ci.org/mallgroup/monolog)
 [![Downloads this Month](https://img.shields.io/packagist/dm/mallgroup/monolog.svg)](https://packagist.org/packages/mallgroup/monolog)
 [![Latest stable](https://img.shields.io/packagist/v/mallgroup/monolog.svg)](https://packagist.org/packages/mallgroup/monolog)
-[![Coverage Status](https://coveralls.io/repos/github/mallgroup/monolog/badge.svg?branch=master)](https://coveralls.io/github/mallgroup/monolog?branch=master)
 
 Integration of [Monolog](https://github.com/Seldaek/monolog) into Nette Framework  
 This is Fork of [Kdyby/Monolog](https://github.com/kdyby/monolog), licensed under new-BSD license
