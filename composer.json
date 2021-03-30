@@ -61,6 +61,10 @@
 			"dev-master": "1.0-dev"
 		}
 	},
+	"scripts": {
+		"phpstan": "phpstan analyse",
+		"tester": "tester tests -s"
+	},
 	"replace": {
 		"kdyby/rabbitmq": "*"
 	}
