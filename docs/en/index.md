@@ -10,7 +10,7 @@ Installation
 The best way to install MG/Monolog is using [Composer](http://getcomposer.org/):
 
 ```sh
-$ composer require mg/monolog
+$ composer require mallgroup/monolog
 ```
 
 and enable it in `config.neon`
