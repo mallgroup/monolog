@@ -66,6 +66,6 @@
 		"tester": "tester tests -s"
 	},
 	"replace": {
-		"kdyby/rabbitmq": "*"
+		"kdyby/monolog": "*"
 	}
 }
