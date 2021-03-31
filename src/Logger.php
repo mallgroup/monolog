@@ -32,8 +32,9 @@ class Logger extends \Monolog\Logger
 	 *
 	 * @param string $message The log message
 	 * @param array<string,mixed> $context The log context
+	 * @return void
 	 */
-	public function addDebug(string $message, array $context = []): void
+	public function addDebug(string $message, array $context = [])
 	{
 		$this->debug($message, array_merge(['channel' => $this->name], $context));
 	}
@@ -45,8 +46,9 @@ class Logger extends \Monolog\Logger
 	 *
 	 * @param string $message The log message
 	 * @param array<string,mixed> $context The log context
+	 * @return void
 	 */
-	public function addInfo(string $message, array $context = []): void
+	public function addInfo(string $message, array $context = [])
 	{
 		$this->info($message, array_merge(['channel' => $this->name], $context));
 	}
@@ -58,8 +60,9 @@ class Logger extends \Monolog\Logger
 	 *
 	 * @param string $message The log message
 	 * @param array<string,mixed> $context The log context
+	 * @return void
 	 */
-	public function addNotice(string $message, array $context = []): void
+	public function addNotice(string $message, array $context = [])
 	{
 		$this->notice($message, array_merge(['channel' => $this->name], $context));
 	}
@@ -71,8 +74,9 @@ class Logger extends \Monolog\Logger
 	 *
 	 * @param string $message The log message
 	 * @param array<string,mixed> $context The log context
+	 * @return void
 	 */
-	public function addWarning(string $message, array $context = []): void
+	public function addWarning(string $message, array $context = [])
 	{
 		$this->warning($message, array_merge(['channel' => $this->name], $context));
 	}
@@ -84,8 +88,9 @@ class Logger extends \Monolog\Logger
 	 *
 	 * @param string $message The log message
 	 * @param array<string,mixed> $context The log context
+	 * @return void
 	 */
-	public function addError(string $message, array $context = []): void
+	public function addError(string $message, array $context = [])
 	{
 		$this->error($message, array_merge(['channel' => $this->name], $context));
 	}
@@ -97,8 +102,9 @@ class Logger extends \Monolog\Logger
 	 *
 	 * @param string $message The log message
 	 * @param array<string,mixed> $context The log context
+	 * @return void
 	 */
-	public function addCritical(string $message, array $context = []): void
+	public function addCritical(string $message, array $context = [])
 	{
 		$this->critical($message, array_merge(['channel' => $this->name], $context));
 	}
@@ -110,8 +116,9 @@ class Logger extends \Monolog\Logger
 	 *
 	 * @param string $message The log message
 	 * @param array<string,mixed> $context The log context
+	 * @return void
 	 */
-	public function addAlert(string $message, array $context = []): void
+	public function addAlert(string $message, array $context = [])
 	{
 		$this->alert($message, array_merge(['channel' => $this->name], $context));
 	}
@@ -123,8 +130,9 @@ class Logger extends \Monolog\Logger
 	 *
 	 * @param string $message The log message
 	 * @param array<string,mixed> $context The log context
+	 * @return void
 	 */
-	public function addEmergency(string $message, array $context = []): void
+	public function addEmergency(string $message, array $context = [])
 	{
 		$this->emergency($message, array_merge(['channel' => $this->name], $context));
 	}
