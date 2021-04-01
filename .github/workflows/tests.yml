@@ -27,21 +27,6 @@ jobs:
                   name: output
                   path: tests/**/output
 
-    tests-php-master:
-        name: PHP Master tests
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v2
-            - uses: shivammathur/setup-php@v2
-              with:
-                  php-version: 8.1
-                  coverage: none
-
-            - run: composer install --no-progress --prefer-dist
-            - run: vendor/bin/tester tests -s -C
-              continue-on-error: true # is only informative
-
-
     lowest_dependencies:
         name: Lowest Dependencies
         runs-on: ubuntu-latest
