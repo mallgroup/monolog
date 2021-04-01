@@ -111,10 +111,10 @@ class MonologExtension extends CompilerExtension
 	protected function loadHandlers(array $config): void
 	{
 		$builder = $this->getContainerBuilder();
-
 		foreach ($config['handlers'] as $handlerName => $implementation) {
-			$serviceName = $this->loadDefinitions($builder, $handlerName, $implementation);
-			$builder->getDefinition($serviceName)
+			$builder->addDefinition($this->prefix('handler.' . $handlerName))
+				->setFactory($implementation)
+				->setAutowired(FALSE)
 				->addTag(self::TAG_HANDLER)
 				->addTag(self::TAG_PRIORITY, is_numeric($handlerName) ? $handlerName : 0);
 		}
@@ -153,8 +153,9 @@ class MonologExtension extends CompilerExtension
 		}
 
 		foreach ($config['processors'] as $processorName => $implementation) {
-			$serviceName = $this->loadDefinitions($builder, $processorName, $implementation);
-			$builder->getDefinition($serviceName)
+			$builder->addDefinition($this->prefix('processors.' . $processorName))
+				->setFactory($implementation)
+				->setAutowired(FALSE)
 				->addTag(self::TAG_PROCESSOR)
 				->addTag(self::TAG_PRIORITY, is_numeric($processorName) ? $processorName : 0);
 		}
@@ -166,7 +167,8 @@ class MonologExtension extends CompilerExtension
 	 * @param Statement $implementation
 	 * @return string
 	 */
-	protected function loadDefinitions(ContainerBuilder $builder, $processorName, $implementation): string {
+	protected function loadDefinitions(ContainerBuilder $builder, $processorName, $implementation): string
+	{
 		if (method_exists($this->compiler, 'loadDefinitionsFromConfig')) {
 			$this->compiler->loadDefinitionsFromConfig([
 				$serviceName = $this->prefix('processor.' . $processorName) => $implementation,
@@ -176,6 +178,7 @@ class MonologExtension extends CompilerExtension
 				$serviceName = $this->prefix('handler.' . $processorName) => $implementation,
 			]);
 		}
+
 		return $serviceName;
 	}
 
