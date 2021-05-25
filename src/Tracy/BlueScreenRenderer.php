@@ -7,9 +7,9 @@
  * For the full copyright and license information, please view the file license.md that was distributed with this source code.
  */
 
-namespace MG\Monolog\Tracy;
+namespace Mallgroup\Monolog\Tracy;
 
-use MG\Monolog\Exception\NotSupportedException;
+use Mallgroup\Monolog\Exception\NotSupportedException;
 use Nette\SmartObject;
 use Throwable;
 use Tracy\BlueScreen;

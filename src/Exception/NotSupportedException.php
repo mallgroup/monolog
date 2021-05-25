@@ -7,7 +7,7 @@
  * For the full copyright and license information, please view the file license.md that was distributed with this source code.
  */
 
-namespace MG\Monolog\Exception;
+namespace Mallgroup\Monolog\Exception;
 
 class NotSupportedException extends \LogicException implements Exception
 {

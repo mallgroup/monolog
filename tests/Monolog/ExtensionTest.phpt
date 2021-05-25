@@ -1,20 +1,19 @@
 <?php
 
 /**
- * Test: MG\Monolog\Extension.
+ * Test: Mallgroup\Monolog\Extension.
  *
  * @testCase
  */
 
 namespace Tests\Monolog;
 
-use MG\Monolog\CustomChannel;
-use MG\Monolog\DI\MonologExtension;
-use MG\Monolog\Logger as MonologLogger;
-use MG\Monolog\Processor\PriorityProcessor;
-use MG\Monolog\Processor\TracyExceptionProcessor;
-use MG\Monolog\Processor\TracyUrlProcessor;
-use MG\Monolog\Tracy\MonologAdapter;
+use Mallgroup\Monolog\CustomChannel;
+use Mallgroup\Monolog\DI\MonologExtension;
+use Mallgroup\Monolog\Logger as MonologLogger;
+use Mallgroup\Monolog\Processor\PriorityProcessor;
+use Mallgroup\Monolog\Processor\TracyExceptionProcessor;
+use Mallgroup\Monolog\Processor\TracyUrlProcessor;
 use Monolog\Handler\BrowserConsoleHandler;
 use Monolog\Handler\ChromePHPHandler;
 use Monolog\Handler\NewRelicHandler;
@@ -63,7 +62,7 @@ class ExtensionTest extends \Tester\TestCase
 		Debugger::$logDirectory = TEMP_DIR;
 
 		$dic = $this->createContainer('default');
-		/** @var \MG\Monolog\Logger $logger */
+		/** @var \Mallgroup\Monolog\Logger $logger */
 		$logger = $dic->getByType(MonologLogger::class);
 
 		Debugger::log('tracy message 1');
@@ -110,12 +109,12 @@ class ExtensionTest extends \Tester\TestCase
 			'[%a%] tracy message 1 {"at":"%a%"} []' . "\n" .
 			'[%a%] Exception: tracy exception message 2 in %a%:%d% {"at":"%a%","exception":"%a%","tracy_filename":"exception-%a%.html","tracy_created":true} []' . "\n" .
 			'[%a%] logger message 1 [] []',
-			file_get_contents(TEMP_DIR . '/info.log')
+			file_get_contents(TEMP_DIR . '/log/info.log')
 		);
 		Assert::match(
 			'[%a%] exception message 1 {"exception":"%a%","tracy_filename":"exception-%a%.html","tracy_created":true} []' . "\n" .
 			'[%a%] exception message 2 {"exception":"%a%","tracy_filename":"exception-%a%.html","tracy_created":true} []',
-			file_get_contents(TEMP_DIR . '/warning.log')
+			file_get_contents(TEMP_DIR . '/log/warning.log')
 		);
 
 		Assert::match(
@@ -123,7 +122,7 @@ class ExtensionTest extends \Tester\TestCase
 			'[%a%] Exception: tracy exception message 1 in %a%:%d% {"at":"%a%","exception":"%a%","tracy_filename":"exception-%a%.html","tracy_created":true} []' . "\n" .
 			'[%a%] logger message 3 [] []' . "\n" .
 			'[%a%] logger message 17 [] []',
-			file_get_contents(TEMP_DIR . '/error.log')
+			file_get_contents(TEMP_DIR . '/log/error.log')
 		);
 
 		Assert::match(
@@ -138,37 +137,37 @@ class ExtensionTest extends \Tester\TestCase
 			'[%a%] ERROR: logger message 18 [] []' . "\n" .
 			'[%a%] CRITICAL: logger message 20 [] []' . "\n" .
 			'[%a%] EMERGENCY: logger message 22 [] []' . "\n",
-			file_get_contents(TEMP_DIR . '/custom.log')
+			file_get_contents(TEMP_DIR . '/log/custom.log')
 		);
 
 		Assert::match(
 			'[%a%] logger message 5 [] []' . "\n",
-			file_get_contents(TEMP_DIR . '/debug.log')
+			file_get_contents(TEMP_DIR . '/log/debug.log')
 		);
 
 		Assert::match(
 			'[%a%] logger message 7 [] []' . "\n",
-			file_get_contents(TEMP_DIR . '/notice.log')
+			file_get_contents(TEMP_DIR . '/log/notice.log')
 		);
 
 		Assert::match(
 			'[%a%] logger message 9 [] []' . "\n" .
 			'[%a%] logger message 19 [] []',
-			file_get_contents(TEMP_DIR . '/critical.log')
+			file_get_contents(TEMP_DIR . '/log/critical.log')
 		);
 
 		Assert::match(
 			'[%a%] logger message 11 [] []' . "\n",
-			file_get_contents(TEMP_DIR . '/alert.log')
+			file_get_contents(TEMP_DIR . '/log/alert.log')
 		);
 
 		Assert::match(
 			'[%a%] logger message 13 [] []' . "\n" .
 			'[%a%] logger message 21 [] []' . "\n",
-			file_get_contents(TEMP_DIR . '/emergency.log')
+			file_get_contents(TEMP_DIR . '/log/emergency.log')
 		);
 
-		Assert::count(4, glob(TEMP_DIR . '/exception-*.html'));
+		Assert::count(4, glob(TEMP_DIR . '/log/exception-*.html'));
 
 		// TEST FOR CUSTOM CHANNEL
 
@@ -219,7 +218,7 @@ class ExtensionTest extends \Tester\TestCase
 			'[%a%] ALERT: custom channel message 18 [] []' . "\n" .
 			'[%a%] EMERGENCY: custom channel message 19 [] []' . "\n" .
 			'[%a%] EMERGENCY: custom channel message 20 [] []' . "\n",
-			file_get_contents(TEMP_DIR . '/test.log')
+			file_get_contents(TEMP_DIR . '/log/test.log')
 		);
 	}
 

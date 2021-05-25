@@ -23,29 +23,33 @@
 	],
 	"require": {
 		"php": ">=7.4 <8.1",
-		"nette/di": "^2.4.17 || ^3.0",
-		"nette/utils": "^2.5.7 || ^3.0",
+		"nette/di": "^3.0",
+		"nette/utils": "^3.0",
 		"monolog/monolog": "^2.2",
-		"tracy/tracy": "^2.6.8"
+		"nette/schema": "^1.2"
 	},
 	"require-dev": {
-		"nette/application": "^2.4.17 || ^3.0.7",
-		"nette/bootstrap": "^2.4.6 || ^3.0",
-		"nette/caching": "^2.5.9 || ^3.0",
-		"nette/http": "^2.4.12 || ^3.0",
+		"nette/application": "^3.0.7",
+		"nette/bootstrap": "^3.0",
+		"nette/caching": "^3.0",
+		"nette/http": "^3.0",
 		"nette/tester": "^2.4",
 		"psr/log": "^1.1",
-		"phpstan/phpstan": "^0.12.80",
-		"php-parallel-lint/php-parallel-lint": "^1.2"
+		"phpstan/phpstan-nette": "^0.12",
+		"php-parallel-lint/php-parallel-lint": "^1.2",
+		"tracy/tracy": "2.6"
+	},
+	"suggest": {
+		"tracy/tracy": "To set tracyHook and get Tracy blueScreen on exceptions"
 	},
 	"minimum-stability": "stable",
 	"support": {
 		"email": "radovan.kepak@mallgroup.com",
-		"issues": "https://github.com/MG/monolog/issues"
+		"issues": "https://github.com/mallgroup/monolog/issues"
 	},
 	"autoload": {
 		"psr-4": {
-			"MG\\Monolog\\": "src/"
+			"Mallgroup\\Monolog\\": "src/"
 		}
 	},
 	"autoload-dev": {
@@ -58,7 +62,7 @@
 	},
 	"extra": {
 		"branch-alias": {
-			"dev-master": "1.0-dev"
+			"dev-master": "2.0-dev"
 		}
 	},
 	"scripts": {

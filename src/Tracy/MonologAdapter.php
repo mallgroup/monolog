@@ -7,7 +7,7 @@
  * For the full copyright and license information, please view the file license.md that was distributed with this source code.
  */
 
-namespace MG\Monolog\Tracy;
+namespace Mallgroup\Monolog\Tracy;
 
 use Monolog\Logger as MonologLogger;
 use Nette\SmartObject;

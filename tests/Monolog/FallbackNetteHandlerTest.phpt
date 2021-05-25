@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Test: MG\Monolog\FallbackNetteHandler.
+ * Test: Mallgroup\Monolog\FallbackNetteHandler.
  *
  * @testCase
  */
@@ -9,7 +9,7 @@
 namespace Tests\Monolog;
 
 use DateTime;
-use MG\Monolog\Handler\FallbackNetteHandler;
+use Mallgroup\Monolog\Handler\FallbackNetteHandler;
 use Monolog\Logger as MonologLogger;
 use Tester\Assert;
 

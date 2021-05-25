@@ -3,3 +3,9 @@ parameters:
 
 	paths:
 		- src
+
+	stubFiles:
+		- stubs/DI/CompilerExtension.stub
+
+includes:
+	- vendor/phpstan/phpstan-nette/extension.neon

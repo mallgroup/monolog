@@ -1,14 +1,14 @@
 <?php
 
 /**
- * Test: MG\Monolog\MonologAdapter.
+ * Test: Mallgroup\Monolog\MonologAdapter.
  *
  * @testCase
  */
 
 namespace Tests\Monolog;
 
-use MG\Monolog\Tracy\BlueScreenRenderer;
+use Mallgroup\Monolog\Tracy\BlueScreenRenderer;
 use Tester\Assert;
 use Tracy\BlueScreen;
 
@@ -23,7 +23,7 @@ class BlueScreenRendererTest extends \Tester\TestCase
 
 		Assert::exception(function () use ($renderer) {
 			$renderer->log('message');
-		}, \MG\Monolog\Exception\NotSupportedException::class, 'This class is only for rendering exceptions');
+		}, \Mallgroup\Monolog\Exception\NotSupportedException::class, 'This class is only for rendering exceptions');
 	}
 
 }

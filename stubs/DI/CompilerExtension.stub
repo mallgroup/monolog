@@ -1,0 +1,12 @@
+<?php
+
+namespace Nette\DI;
+
+use stdClass;
+
+abstract class CompilerExtension {
+	/**
+	 * @var stdClass
+	 */
+	public $config;
+}

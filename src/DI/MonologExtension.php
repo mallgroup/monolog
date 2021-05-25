@@ -7,28 +7,29 @@
  * For the full copyright and license information, please view the file license.md that was distributed with this source code.
  */
 
-namespace MG\Monolog\DI;
+namespace Mallgroup\Monolog\DI;
 
-use MG\Monolog\Handler\FallbackNetteHandler;
-use MG\Monolog\Logger as MGLogger;
-use MG\Monolog\Processor\PriorityProcessor;
-use MG\Monolog\Processor\TracyExceptionProcessor;
-use MG\Monolog\Processor\TracyUrlProcessor;
-use MG\Monolog\Tracy\BlueScreenRenderer;
-use MG\Monolog\Tracy\MonologAdapter;
+use Mallgroup\Monolog\Handler\FallbackNetteHandler;
+use Mallgroup\Monolog\Logger;
+use Mallgroup\Monolog\Processor\PriorityProcessor;
+use Mallgroup\Monolog\Processor\TracyExceptionProcessor;
+use Mallgroup\Monolog\Processor\TracyUrlProcessor;
+use Mallgroup\Monolog\Tracy\BlueScreenRenderer;
+use Mallgroup\Monolog\Tracy\MonologAdapter;
 use Nette\Configurator;
 use Nette\DI\Compiler;
 use Nette\DI\CompilerExtension;
-use Nette\DI\Config\Helpers;
-use Nette\DI\ContainerBuilder;
-use Nette\DI\Helpers as DIHelpers;
-use Nette\DI\Statement;
-use Nette\DI\Definitions;
-use Nette\PhpGenerator\ClassType as ClassTypeGenerator;
+use Nette\DI\Definitions\ServiceDefinition;
+use Nette\DI\Definitions\Statement;
+use Nette\PhpGenerator\ClassType;
 use Nette\PhpGenerator\Closure;
 use Nette\PhpGenerator\PhpLiteral;
+use Nette\Schema\Expect;
+use Nette\Schema\Schema;
 use Nette\SmartObject;
+use Nette\Utils\Strings;
 use Psr\Log\LoggerAwareInterface;
+use RuntimeException;
 use Tracy\Debugger;
 use Tracy\ILogger;
 
@@ -37,178 +38,158 @@ use Tracy\ILogger;
  */
 class MonologExtension extends CompilerExtension
 {
-
 	use SmartObject;
 
 	public const TAG_HANDLER = 'monolog.handler';
 	public const TAG_PROCESSOR = 'monolog.processor';
 	public const TAG_PRIORITY = 'monolog.priority';
 
-	/** @var array<string,mixed> */
-	private array $defaults = [
-		'handlers' => [],
-		'processors' => [],
-		'name' => 'app',
-		'hookToTracy' => TRUE,
-		'tracyBaseUrl' => NULL,
-		'usePriorityProcessor' => TRUE,
-		'registerFallback' => FALSE,
-		'accessPriority' => ILogger::INFO,
-	];
+	public static function register(Configurator $configurator): void
+	{
+		$configurator->onCompile[] = static function ($config, Compiler $compiler) {
+			$compiler->addExtension('monolog', new MonologExtension());
+		};
+	}
+
+	public function getConfigSchema(): Schema
+	{
+		$builder = $this->getContainerBuilder();
+		return Expect::structure([
+			'handlers' => Expect::arrayOf('string|array'),
+			'processors' => Expect::arrayOf('string|array'),
+			'name' => Expect::string('app'),
+			'logDir' => Expect::string($builder->parameters['tempDir'] . '/log'),
+			'tracyDefinition' => Expect::string('tracy.logger'),
+			'tracyHook' => Expect::bool(true),
+			'tracyBaseUrl' => Expect::string(),
+			'usePriorityProcessor' => Expect::bool(true),
+			'registerFallback' => Expect::bool(false),
+			'accessPriority' => Expect::string(ILogger::INFO),
+		]);
+	}
 
 	public function loadConfiguration(): void
 	{
 		$builder = $this->getContainerBuilder();
-		/** @var array<string,mixed> $config */
-		$config = Helpers::merge($this->config, $this->defaults);
-		$config['logDir'] = self::resolveLogDir($builder->parameters);
-		self::createDirectory($config['logDir']);
-		$this->setConfig($config);
+		$this->verifyLogDirectory($this->config->logDir);
 
-		if (!isset($builder->parameters[$this->name]) || (is_array($builder->parameters[$this->name]) && !isset($builder->parameters[$this->name]['name']))) {
-			$builder->parameters[$this->name]['name'] = $config['name'];
+		$builder
+			->addDefinition($this->prefix('logger'))
+			->setFactory(Logger::class, [$this->config->name]);
+
+		# Hook tracy if required
+		if ($builder->hasDefinition($this->config->tracyDefinition)) {
+			$this->hookTracy();
 		}
 
-		if (!isset($builder->parameters['logDir'])) { // BC
-			$builder->parameters['logDir'] = $config['logDir'];
-		}
-
-		$builder->addDefinition($this->prefix('logger'))
-			->setFactory(MGLogger::class, [$config['name']]);
-
-		// Tracy adapter
-		$builder->addDefinition($this->prefix('adapter'))
-			->setFactory(MonologAdapter::class, [
-				'monolog' => $this->prefix('@logger'),
-				'blueScreenRenderer' => $this->prefix('@blueScreenRenderer'),
-				'email' => Debugger::$email,
-				'accessPriority' => $config['accessPriority'],
-			])
-			->addTag('logger');
-
-		// The renderer has to be separate, to solve circural service dependencies
-		$builder->addDefinition($this->prefix('blueScreenRenderer'))
-			->setFactory(BlueScreenRenderer::class, [
-				'directory' => $config['logDir'],
-			])
-			->setAutowired(FALSE)
-			->addTag('logger');
-
-		if ($config['hookToTracy'] === TRUE && $builder->hasDefinition('tracy.logger')) {
-			// TracyExtension initializes the logger from DIC, if definition is changed
-			$builder->removeDefinition($existing = 'tracy.logger');
-			$builder->addAlias($existing, $this->prefix('adapter'));
-		}
-
-		$this->loadHandlers($config);
-		$this->loadProcessors($config);
-		$this->setConfig($config);
+		# Load other stuff
+		$this->loadHandlers();
+		$this->loadProcessors();
 	}
 
-	/**
-	 * @param array<string,mixed> $config
-	 */
-	protected function loadHandlers(array $config): void
+	protected function loadHandlers(): void
 	{
 		$builder = $this->getContainerBuilder();
-		foreach ($config['handlers'] as $handlerName => $implementation) {
-			$builder->addDefinition($this->prefix('handler.' . $handlerName))
-				->setFactory($implementation)
-				->setAutowired(FALSE)
+		foreach($this->config->handlers as $name => $implementation) {
+			$service = $this->getDefinition(
+				$implementation,
+				$this->prefix('handler.' . $name)
+			);
+			$builder
+				->getDefinition($service)
 				->addTag(self::TAG_HANDLER)
-				->addTag(self::TAG_PRIORITY, is_numeric($handlerName) ? $handlerName : 0);
+				->addTag(self::TAG_PRIORITY, is_numeric($name) ? $name : 0);
 		}
 	}
 
-	/**
-	 * @param array<string,mixed> $config
-	 */
-	protected function loadProcessors(array $config): void
+	protected function loadProcessors(): void
 	{
 		$builder = $this->getContainerBuilder();
-
-		if ($config['usePriorityProcessor'] === TRUE) {
-			// change channel name to priority if available
-			$builder->addDefinition($this->prefix('processor.priorityProcessor'))
+		if ($this->config->usePriorityProcessor === true) {
+			$builder
+				->addDefinition($this->prefix('processor.priorityProcessor'))
 				->setFactory(PriorityProcessor::class)
 				->addTag(self::TAG_PROCESSOR)
 				->addTag(self::TAG_PRIORITY, 20);
 		}
 
-		$builder->addDefinition($this->prefix('processor.tracyException'))
-			->setFactory(TracyExceptionProcessor::class, [
-				'blueScreenRenderer' => $this->prefix('@blueScreenRenderer'),
-			])
-			->addTag(self::TAG_PROCESSOR)
-			->addTag(self::TAG_PRIORITY, 100);
-
-		if ($config['tracyBaseUrl'] !== NULL) {
-			$builder->addDefinition($this->prefix('processor.tracyBaseUrl'))
-				->setFactory(TracyUrlProcessor::class, [
-					'baseUrl' => $config['tracyBaseUrl'],
-					'blueScreenRenderer' => $this->prefix('@blueScreenRenderer'),
-				])
+		foreach($this->config->processors as $name => $implementation) {
+			$service = $this->getDefinition(
+				$implementation,
+				$this->prefix('processors.' . $name)
+			);
+			$builder
+				->getDefinition($service)
 				->addTag(self::TAG_PROCESSOR)
-				->addTag(self::TAG_PRIORITY, 10);
-		}
-
-		foreach ($config['processors'] as $processorName => $implementation) {
-			$builder->addDefinition($this->prefix('processors.' . $processorName))
-				->setFactory($implementation)
-				->setAutowired(FALSE)
-				->addTag(self::TAG_PROCESSOR)
-				->addTag(self::TAG_PRIORITY, is_numeric($processorName) ? $processorName : 0);
+				->addTag(self::TAG_PRIORITY, is_numeric($name) ? $name : 0);
 		}
 	}
 
 	/**
-	 * @param ContainerBuilder $builder
-	 * @param string|int $processorName
-	 * @param Statement $implementation
+	 * @param string|mixed[]|Statement $definition
+	 * @param string $name
 	 * @return string
 	 */
-	protected function loadDefinitions(ContainerBuilder $builder, $processorName, $implementation): string
+	protected function getDefinition($definition, string $name): string
 	{
-		if (method_exists($this->compiler, 'loadDefinitionsFromConfig')) {
-			$this->compiler->loadDefinitionsFromConfig([
-				$serviceName = $this->prefix('processor.' . $processorName) => $implementation,
-			]);
-		} else {
-			Compiler::loadDefinitions($builder, [
-				$serviceName = $this->prefix('handler.' . $processorName) => $implementation,
-			]);
+		// String definition
+		if (is_string($definition)) {
+
+			// @alias
+			if (Strings::startsWith($definition, '@')) {
+				return $definition;
+			}
+
+			// Inline string definition
+			$this
+				->getContainerBuilder()
+				->addDefinition($name, (new ServiceDefinition())->setType($definition))
+				->setAutowired(false);
+			return $name;
 		}
 
-		return $serviceName;
+		// Add service and set it autowired (default is false)
+		if (is_array($definition)) {
+			$definition['autowired'] ??= false;
+		}
+		$this->compiler->loadDefinitionsFromConfig([
+			$name => $definition
+		]);
+
+		return $name;
 	}
 
 	public function beforeCompile(): void
 	{
 		$builder = $this->getContainerBuilder();
-		$logger = $builder->getDefinition($this->prefix('logger'));
 
+		/** @var ServiceDefinition $logger */
+		$logger = $builder->getDefinition($this->prefix('logger'));
 		foreach ($handlers = $this->findByTagSorted(self::TAG_HANDLER) as $serviceName => $meta) {
 			$logger->addSetup('pushHandler', ['@' . $serviceName]);
 		}
-
 		foreach ($this->findByTagSorted(self::TAG_PROCESSOR) as $serviceName => $meta) {
 			$logger->addSetup('pushProcessor', ['@' . $serviceName]);
 		}
 
-		if (empty($handlers) && !array_key_exists('registerFallback', $this->config)) {
-			$this->config['registerFallback'] = TRUE;
+		// Register fallback, if no handlers is set or registerFallback is true
+		if (!$handlers || $this->config->registerFallback) {
+			$builder
+				->addDefinition($this->prefix('fallback'))
+				->setFactory(FallbackNetteHandler::class, [
+					'appName' => $this->config->name,
+					'logDir' => $this->config->logDir
+				])
+				->setAutowired(false)
+				->addTag(self::TAG_HANDLER)
+				->addTag(self::TAG_PRIORITY, 0);
+
+			$logger->addSetup('pushHandler', ['@' . $this->prefix('fallback')]);
 		}
 
-		if (array_key_exists('registerFallback', $this->config) && !empty($this->config['registerFallback'])) {
-			$logger->addSetup('pushHandler', [
-				new Statement(FallbackNetteHandler::class, [
-					'appName' => $this->config['name'],
-					'logDir' => $this->config['logDir'],
-				]),
-			]);
-		}
-
+		// Decorator for LoggerAwareInterface
 		foreach ($builder->findByType(LoggerAwareInterface::class) as $service) {
+			/** @var ServiceDefinition $service */
 			$service->addSetup('setLogger', ['@' . $this->prefix('logger')]);
 		}
 	}
@@ -220,56 +201,93 @@ class MonologExtension extends CompilerExtension
 	protected function findByTagSorted(string $tag): array
 	{
 		$builder = $this->getContainerBuilder();
-
 		$services = $builder->findByTag($tag);
-		uksort($services, static function ($nameA, $nameB) use ($builder) {
-			$pa = $builder->getDefinition($nameA)->getTag(self::TAG_PRIORITY) ?: 0;
-			$pb = $builder->getDefinition($nameB)->getTag(self::TAG_PRIORITY) ?: 0;
-			return $pa > $pb ? 1 : ($pa < $pb ? -1 : 0);
-		});
+
+		uksort(
+			$services,
+			static fn($a, $b) => ($builder->getDefinition($a)->getTag(self::TAG_PRIORITY) ?: 0) <=> ($builder->getDefinition($b)->getTag(self::TAG_PRIORITY) ?: 0)
+		);
 
 		return $services;
 	}
 
-	public function afterCompile(ClassTypeGenerator $class): void
+	public function afterCompile(ClassType $class): void
 	{
+		if (!$this->config->tracyHook
+			|| !class_exists(Debugger::class)
+			|| !$this->getContainerBuilder()->hasDefinition($this->config->tracyDefinition)
+		) {
+			return;
+		}
+
 		$closure = new Closure;
-		$closure->addBody('?::setLogger($this->getService(?));', [new PhpLiteral(Debugger::class), $this->prefix('adapter')]);
+		$closure->addBody('?::setLogger($this->getService(?));', [new PhpLiteral(Debugger::class), $this->prefix('tracy')]);
 
 		$initialize = $class->getMethod('initialize');
-		if (Debugger::$logDirectory === NULL && array_key_exists('logDir', $this->config)) {
-			$initialize->addBody('?::$logDirectory = ?;', [new PhpLiteral(Debugger::class), $this->config['logDir']]);
+
+		if (Debugger::$logDirectory === null) {
+			$initialize->addBody('?::$logDirectory = ?;', [new PhpLiteral(Debugger::class), $this->config->logDir]);
 		}
+
 		$initialize->addBody("// monolog\n($closure)();");
-	}
-
-	public static function register(Configurator $configurator): void
-	{
-		$configurator->onCompile[] = static function ($config, Compiler $compiler) {
-			$compiler->addExtension('monolog', new MonologExtension());
-		};
-	}
-
-	/**
-	 * @param array<string,mixed> $parameters
-	 * @return string
-	 */
-	private static function resolveLogDir(array $parameters): string
-	{
-		if (isset($parameters['logDir'])) {
-			return DIHelpers::expand('%logDir%', $parameters);
-		}
-
-		return Debugger::$logDirectory ?? DIHelpers::expand('%appDir%/../log', $parameters);
 	}
 
 	/**
 	 * @param string $logDir
+	 * @throws RuntimeException
 	 */
-	private static function createDirectory(string $logDir): void
+	private function verifyLogDirectory(string $logDir): void
 	{
-		if (!@mkdir($logDir, 0777, TRUE) && !is_dir($logDir)) {
-			throw new \RuntimeException(sprintf('Log dir %s cannot be created', $logDir));
+		if (!@mkdir($logDir, 0777, true) && !is_dir($logDir)) {
+			throw new RuntimeException(sprintf('Log dir %s cannot be created', $logDir));
+		}
+	}
+
+	private function hookTracy(): void
+	{
+		$builder = $this->getContainerBuilder();
+		$builder
+			->addDefinition($this->prefix('tracy'))
+			->setFactory(MonologAdapter::class, [
+				'monolog' => $this->prefix('@logger'),
+				'blueScreenRenderer' => $this->prefix('@blueScreenRenderer'),
+				'email' => Debugger::$email,
+				'accessPriority' => $this->config->accessPriority,
+			])
+			->addTag('logger')
+			->setAutowired(false);
+
+		$builder
+			->addDefinition($this->prefix('blueScreenRenderer'))
+			->setFactory(BlueScreenRenderer::class, [
+				'directory' => $this->config->logDir
+			])
+			->setAutowired(false)
+			->addTag('logger');
+
+		$builder
+			->addDefinition($this->prefix('processor.tracyException'))
+			->setFactory(TracyExceptionProcessor::class, [
+				'blueScreenRenderer' => $this->prefix('@blueScreenRenderer'),
+			])
+			->addTag(self::TAG_PROCESSOR)
+			->addTag(self::TAG_PRIORITY, 100);
+
+		if ($this->config->tracyBaseUrl) {
+			$builder
+				->addDefinition($this->prefix('processor.tracyBaseUrl'))
+				->setFactory(TracyUrlProcessor::class, [
+					'baseUrl' => $this->config->tracyBaseUrl,
+					'blueScreenRenderer' => $this->prefix('@blueScreenRenderer'),
+				])
+				->addTag(self::TAG_PROCESSOR)
+				->addTag(self::TAG_PRIORITY, 10);
+		}
+
+		if ($this->config->tracyHook === true) {
+			$builder->removeDefinition($this->config->tracyDefinition);
+			$builder->addAlias($this->config->tracyDefinition, $this->prefix('tracy'));
+			$builder->getDefinition($this->prefix('tracy'))->setAutowired(true);
 		}
 	}
 }
