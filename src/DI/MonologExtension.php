@@ -27,7 +27,6 @@ use Nette\PhpGenerator\Closure;
 use Nette\PhpGenerator\PhpLiteral;
 use Nette\Schema\Expect;
 use Nette\Schema\Schema;
-use Nette\SmartObject;
 use Nette\Utils\Strings;
 use Psr\Log\LoggerAwareInterface;
 use RuntimeException;
@@ -39,12 +38,6 @@ use Tracy\ILogger;
  */
 class MonologExtension extends CompilerExtension
 {
-	use SmartObject;
-
-	public const TAG_HANDLER = 'monolog.handler';
-	public const TAG_PROCESSOR = 'monolog.processor';
-	public const TAG_PRIORITY = 'monolog.priority';
-
 	/** @var PriorityDefinition[] */
 	private array $handlers = [];
 
@@ -54,7 +47,7 @@ class MonologExtension extends CompilerExtension
 	public static function register(Configurator $configurator): void
 	{
 		$configurator->onCompile[] = static function ($config, Compiler $compiler) {
-			$compiler->addExtension('monolog', new MonologExtension());
+			$compiler->addExtension('monolog', new MonologExtension);
 		};
 	}
 
@@ -97,7 +90,6 @@ class MonologExtension extends CompilerExtension
 
 	protected function loadHandlers(): void
 	{
-		$builder = $this->getContainerBuilder();
 		foreach ($this->config->handlers as $name => $implementation) {
 			$this->handlers[] = new PriorityDefinition(
 				$this->getDefinition(
@@ -111,10 +103,9 @@ class MonologExtension extends CompilerExtension
 
 	protected function loadProcessors(): void
 	{
-		$builder = $this->getContainerBuilder();
 		if ($this->config->usePriorityProcessor === true) {
 			$this->processors[] = new PriorityDefinition(
-				$builder
+				$this->getContainerBuilder()
 					->addDefinition($this->prefix('processor.priorityProcessor'))
 					->setFactory(PriorityProcessor::class),
 				20
@@ -153,7 +144,7 @@ class MonologExtension extends CompilerExtension
 
 			// Inline definition
 			return $builder
-				->addDefinition($name, (new ServiceDefinition())->setType($definition))
+				->addDefinition($name, (new ServiceDefinition)->setType($definition))
 				->setAutowired(false);
 		}
 
