@@ -1,6 +1,7 @@
 monolog:
-	tracyBaseUrl: https://exceptions.kdyby.org
+	logDir: %tempDir%/log
+	tracyBaseUrl: https://exception.mallgroup.com
 	processors:
-		- Monolog\Processor\GitProcessor()
-		- Monolog\Processor\ProcessIdProcessor()
-		- Monolog\Processor\WebProcessor()
+		- Monolog\Processor\GitProcessor
+		- Monolog\Processor\ProcessIdProcessor
+		- Monolog\Processor\WebProcessor

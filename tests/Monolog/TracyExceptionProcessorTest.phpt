@@ -1,15 +1,15 @@
 <?php
 
 /**
- * Test: MG\Monolog\Processor\TracyExceptionProcessor.
+ * Test: Mallgroup\Monolog\Processor\TracyExceptionProcessor.
  *
  * @testCase
  */
 
 namespace Tests\Monolog;
 
-use MG\Monolog\Processor\TracyExceptionProcessor;
-use MG\Monolog\Tracy\BlueScreenRenderer;
+use Mallgroup\Monolog\Processor\TracyExceptionProcessor;
+use Mallgroup\Monolog\Tracy\BlueScreenRenderer;
 use Tester\Assert;
 use Tracy\BlueScreen;
 

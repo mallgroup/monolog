@@ -7,9 +7,9 @@
  * For the full copyright and license information, please view the file license.md that was distributed with this source code.
  */
 
-namespace MG\Monolog;
+namespace Mallgroup\Monolog;
 
-use MG\Monolog\Logger as CustomLogger;
+use Mallgroup\Monolog\Logger as CustomLogger;
 use Monolog\Handler\HandlerInterface;
 use Monolog\Logger as MonologLogger;
 use Nette\SmartObject;

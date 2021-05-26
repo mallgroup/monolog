@@ -7,7 +7,7 @@
  * For the full copyright and license information, please view the file license.md that was distributed with this source code.
  */
 
-namespace MG\Monolog\Handler;
+namespace Mallgroup\Monolog\Handler;
 
 use Monolog\Formatter\LineFormatter;
 use Monolog\Logger as MonologLogger;

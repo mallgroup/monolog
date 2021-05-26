@@ -13,7 +13,7 @@ This is Fork of [Kdyby/Monolog](https://github.com/kdyby/monolog), licensed unde
 Installation
 ------------
 
-The best way to install MG/Monolog is using [Composer](http://getcomposer.org/):
+The best way to install Mallgroup/Monolog is using [Composer](http://getcomposer.org/):
 
 ```sh
 $ composer require mallgroup/monolog

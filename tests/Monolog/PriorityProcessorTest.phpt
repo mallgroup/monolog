@@ -1,14 +1,14 @@
 <?php
 
 /**
- * Test: MG\Monolog\PriorityProcessor.
+ * Test: Mallgroup\Monolog\PriorityProcessor.
  *
  * @testCase
  */
 
 namespace Tests\Monolog;
 
-use MG\Monolog\Processor\PriorityProcessor;
+use Mallgroup\Monolog\Processor\PriorityProcessor;
 use Tester\Assert;
 
 require_once __DIR__ . '/../bootstrap.php';

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Test: MG\Monolog\MonologAdapter.
+ * Test: Mallgroup\Monolog\MonologAdapter.
  *
  * @testCase
  */
@@ -9,8 +9,8 @@
 namespace Tests\Monolog;
 
 use DateTimeInterface;
-use MG\Monolog\Tracy\BlueScreenRenderer;
-use MG\Monolog\Tracy\MonologAdapter;
+use Mallgroup\Monolog\Tracy\BlueScreenRenderer;
+use Mallgroup\Monolog\Tracy\MonologAdapter;
 use Monolog\Handler\TestHandler;
 use Monolog\Logger as MonologLogger;
 use Tester\Assert;

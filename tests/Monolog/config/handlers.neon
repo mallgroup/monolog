@@ -1,5 +1,6 @@
 monolog:
+	logDir: %tempDir%/log
 	handlers:
-		- Monolog\Handler\BrowserConsoleHandler()
-		- Monolog\Handler\ChromePHPHandler()
-		- Monolog\Handler\NewRelicHandler()
+		- Monolog\Handler\BrowserConsoleHandler
+		- Monolog\Handler\ChromePHPHandler
+		- Monolog\Handler\NewRelicHandler

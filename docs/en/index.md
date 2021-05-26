@@ -7,7 +7,7 @@ Integration of [Monolog](https://github.com/Seldaek/monolog) into Nette Framewor
 Installation
 ------------
 
-The best way to install MG/Monolog is using [Composer](http://getcomposer.org/):
+The best way to install Mallgroup/Monolog is using [Composer](http://getcomposer.org/):
 
 ```sh
 $ composer require mallgroup/monolog
@@ -17,7 +17,7 @@ and enable it in `config.neon`
 
 ```yml
 extensions:
-	monolog: MG\Monolog\DI\MonologExtension
+	monolog: Mallgroup\Monolog\DI\MonologExtension
 ```
 
 
@@ -45,7 +45,7 @@ You can of course turn off the registration into Tracy
 
 ```yml
 monolog:
-	hookToTracy: off
+	tracyHook: off
 ```
 
 but then you have to handle the messages yourself and you're giving up the power of Monolog.
@@ -90,7 +90,7 @@ Processors are special type of class, that has to implement one method only - `_
 They're called for every message, that is sent to Monolog so they can change it's contents.
 When you're adding processor programatically in your application, you can also use closures.
 
-MG\Monolog always registers it's custom `PriorityProcessor`, which has two tasks
+Mallgroup\Monolog always registers it's custom `PriorityProcessor`, which has two tasks
 
 - when message `context` contains `channel` name, change the real `channel` to that name and unset the value from `context`
 - or, when the `context` has `priority` defined and the priority is standard name of record level (info, warning, error, ...) change the `channel` name to that
@@ -142,10 +142,10 @@ class EmailQueue
 Let's change the signature a bit, so the autocompletion starts working as expected
 
 ```php
-public function __construct(\Nette\Mail\IMailer $mailer, \MG\Monolog\Logger $logger)
+public function __construct(\Nette\Mail\IMailer $mailer, \Mallgroup\Monolog\Logger $logger)
 ```
 
-The custom logger in MG\Monolog only adds one new method `->channel($name)`, which is a factory for custom Logger with custom channel, that does nothing but proxy the messages to it's parent.
+The custom logger in Mallgroup\Monolog only adds one new method `->channel($name)`, which is a factory for custom Logger with custom channel, that does nothing but proxy the messages to it's parent.
 
 If we now use the factory instead of simply assigning the value
 
