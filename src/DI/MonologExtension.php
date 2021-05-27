@@ -166,7 +166,7 @@ class MonologExtension extends CompilerExtension
 			$name => $definition,
 		]);
 
-		return $name;
+		return '@' . $name;
 	}
 
 	public function beforeCompile(): void
