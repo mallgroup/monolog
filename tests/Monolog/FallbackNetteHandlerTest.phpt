@@ -30,7 +30,12 @@ class FallbackNetteHandlerTest extends \Tester\TestCase
 			unlink($logFile);
 		}
 
-		$this->handler = new FallbackNetteHandler('mall', $this->logDir);
+		$this->handler = new FallbackNetteHandler(
+			'mall',
+			$this->logDir,
+			'[%datetime%] %message% %context% %extra%',
+			'[%datetime%] %level_name%: %message% %context% %extra%'
+		);
 
 		$this->now = new DateTime();
 	}
