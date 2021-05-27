@@ -19,21 +19,25 @@ use Monolog\Logger as MonologLogger;
 class FallbackNetteHandler extends \Monolog\Handler\ErrorLogHandler
 {
 
-	use \Nette\SmartObject;
-
 	private string $appName;
 	private string $logDir;
 	private LineFormatter $defaultFormatter;
 	private LineFormatter $priorityFormatter;
 
-	public function __construct(string $appName, string $logDir, bool $expandNewlines = FALSE, int $level = MonologLogger::DEBUG)
-	{
+	public function __construct(
+		string $appName,
+		string $logDir,
+		string $defaultFormat,
+		string $priorityFormat,
+		bool $expandNewlines = FALSE,
+		int $level = MonologLogger::DEBUG
+	) {
 		parent::__construct(self::SAPI, $level, TRUE, $expandNewlines);
 		$this->appName = $appName;
 		$this->logDir = $logDir;
 
-		$this->defaultFormatter = new LineFormatter('[%datetime%] %message% %context% %extra%');
-		$this->priorityFormatter = new LineFormatter('[%datetime%] %level_name%: %message% %context% %extra%');
+		$this->defaultFormatter = new LineFormatter($defaultFormat);
+		$this->priorityFormatter = new LineFormatter($priorityFormat);
 	}
 
 	/**

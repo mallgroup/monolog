@@ -1,6 +1,10 @@
+services:
+	browserConsoleHandler: Monolog\Handler\BrowserConsoleHandler
+
 monolog:
 	logDir: %tempDir%/log
 	handlers:
-		- Monolog\Handler\BrowserConsoleHandler
-		- Monolog\Handler\ChromePHPHandler
+		- @browserConsoleHandler
+		-
+			factory: Monolog\Handler\ChromePHPHandler
 		- Monolog\Handler\NewRelicHandler

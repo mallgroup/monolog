@@ -64,7 +64,12 @@ class MonologExtension extends CompilerExtension
 			'tracyHook' => Expect::bool(true),
 			'tracyBaseUrl' => Expect::string(),
 			'usePriorityProcessor' => Expect::bool(true),
-			'registerFallback' => Expect::bool(false),
+			'fallback' => Expect::structure([
+				'register' => Expect::bool(false),
+				'defaultFormat' => Expect::string('[%datetime%] %message% %context% %extra%'),
+				'priorityFormat' => Expect::string('[%datetime%] %level_name%: %message% %context% %extra%'),
+			]),
+			'registerFallback' => Expect::bool(false)->deprecated(),
 			'accessPriority' => Expect::string(ILogger::INFO),
 		]);
 	}
@@ -86,6 +91,11 @@ class MonologExtension extends CompilerExtension
 		# Load other stuff
 		$this->loadHandlers();
 		$this->loadProcessors();
+
+		# registerFallback transformation
+		if ($this->config->registerFallback) {
+			$this->config->fallback->register = true;
+		}
 	}
 
 	protected function loadHandlers(): void
@@ -132,23 +142,23 @@ class MonologExtension extends CompilerExtension
 	{
 		$builder = $this->getContainerBuilder();
 
-		// String definition
+		# String definition
 		if (is_string($definition)) {
 
-			// @alias
+			# @alias
 			if (Strings::startsWith($definition, '@')) {
 				$defName = substr($definition, 1);
 
 				return $builder->hasDefinition($defName) ? $builder->getDefinition($defName) : $definition;
 			}
 
-			// Inline definition
+			# Inline definition
 			return $builder
 				->addDefinition($name, (new ServiceDefinition)->setType($definition))
 				->setAutowired(false);
 		}
 
-		// Add service and set autowired
+		# Add service and set autowired
 		if (is_array($definition)) {
 			$definition['autowired'] ??= false;
 		}
@@ -156,7 +166,7 @@ class MonologExtension extends CompilerExtension
 			$name => $definition,
 		]);
 
-		return $name;
+		return '@' . $name;
 	}
 
 	public function beforeCompile(): void
@@ -168,20 +178,22 @@ class MonologExtension extends CompilerExtension
 		$logger->setArgument('handlers', $this->getDefinitionsByPriority($this->handlers));
 		$logger->setArgument('processors', $this->getDefinitionsByPriority($this->processors));
 
-		// Register fallback, if no handlers is set or registerFallback is true
-		if (!$this->handlers || $this->config->registerFallback) {
+		# Register fallback, if no handlers is set or fallback->register is true
+		if (!$this->handlers || $this->config->fallback->register) {
 			$builder
 				->addDefinition($this->prefix('fallback'))
 				->setFactory(FallbackNetteHandler::class, [
 					'appName' => $this->config->name,
 					'logDir' => $this->config->logDir,
+					'defaultFormat' => $this->config->fallback->defaultFormat,
+					'priorityFormat' => $this->config->fallback->priorityFormat,
 				])
 				->setAutowired(false);
 
 			$logger->addSetup('pushHandler', ['@' . $this->prefix('fallback')]);
 		}
 
-		// Decorator for LoggerAwareInterface
+		# Decorator for LoggerAwareInterface
 		foreach ($builder->findByType(LoggerAwareInterface::class) as $service) {
 			/** @var ServiceDefinition $service */
 			$service->addSetup('setLogger', ['@' . $this->prefix('logger')]);
