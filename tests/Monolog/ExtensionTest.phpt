@@ -10,6 +10,7 @@ namespace Tests\Monolog;
 
 use Mallgroup\Monolog\CustomChannel;
 use Mallgroup\Monolog\DI\MonologExtension;
+use Mallgroup\Monolog\Handler\FallbackNetteHandler;
 use Mallgroup\Monolog\Logger as MonologLogger;
 use Mallgroup\Monolog\Processor\PriorityProcessor;
 use Mallgroup\Monolog\Processor\TracyExceptionProcessor;
@@ -247,6 +248,15 @@ class ExtensionTest extends \Tester\TestCase
 		Assert::type(GitProcessor::class, array_shift($processors));
 	}
 
+	public function testDeprecated(): void {
+		Assert::error(function(){
+			$dic = $this->createContainer('deprecated');
+			$logger = $dic->getByType(MonologLogger::class);
+			$handlers = $logger->getHandlers();
+
+			Assert::type(FallbackNetteHandler::class, array_shift($handlers));
+		}, E_USER_DEPRECATED);
+	}
 }
 
 (new ExtensionTest())->run();

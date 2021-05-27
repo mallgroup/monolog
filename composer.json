@@ -23,7 +23,7 @@
 	],
 	"require": {
 		"php": ">=7.4 <8.1",
-		"nette/di": "^3.0.5",
+		"nette/di": "^3.0.7",
 		"nette/utils": "^3.0",
 		"monolog/monolog": "^2.2",
 		"nette/schema": "^1.2"

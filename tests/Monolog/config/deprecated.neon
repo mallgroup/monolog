@@ -1,4 +1,3 @@
 monolog:
-	fallback:
-		register: true
+	registerFallback: true
 	logDir: %tempDir%/log
