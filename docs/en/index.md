@@ -60,11 +60,13 @@ Fallback handler
 This is the default handler that simulates the default Tracy behaviour and is registered only when no other handler is registered.
 When you start registering custom handlers, it automatically disables itself (to be exact, the extension does that) because it expects you know what you're doing :)
 
-When you wanna for example have syslog on production and still have messages written to disk on localhost, you can easily configure that
+When you wanna for example have syslog on production and still have messages written to disk on localhost, you can easily configure that, even change format of logs (default and priority)
 
 ```yml
 monolog:
-	registerFallback: %debugMode%
+	fallback:
+		register: %debugMode%
+		defaultFormat: '[%datetime%]: %message% - %context% | %extra%'
 ```
 
 The adapter even helps handle messages with non-standard level name (standard are: info, warning, error...).
