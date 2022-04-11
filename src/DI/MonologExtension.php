@@ -16,6 +16,7 @@ use Mallgroup\Monolog\Processor\TracyExceptionProcessor;
 use Mallgroup\Monolog\Processor\TracyUrlProcessor;
 use Mallgroup\Monolog\Tracy\BlueScreenRenderer;
 use Mallgroup\Monolog\Tracy\MonologAdapter;
+use Monolog\ErrorHandler;
 use Nette\Configurator;
 use Nette\DI\Compiler;
 use Nette\DI\CompilerExtension;
@@ -44,6 +45,12 @@ class MonologExtension extends CompilerExtension
 	/** @var PriorityDefinition[] */
 	private array $processors = [];
 
+	private const EXCEPTION_HANDLER = 'exception';
+
+	private const ERROR_HANDLER = 'error';
+
+	private const FATAL_HANDLER = 'fatal';
+
 	public static function register(Configurator $configurator): void
 	{
 		$configurator->onCompile[] = static function ($config, Compiler $compiler) {
@@ -71,6 +78,11 @@ class MonologExtension extends CompilerExtension
 			]),
 			'registerFallback' => Expect::bool(false)->deprecated(),
 			'accessPriority' => Expect::string(ILogger::INFO),
+			'errorHandler' => Expect::structure([
+				'handlers' => Expect::arrayOf(Expect::string()),
+				'handleOnlyReportedErrors' => Expect::bool(true),
+				'errorTypes' => Expect::int(-1),
+			]),
 		]);
 	}
 
@@ -198,6 +210,32 @@ class MonologExtension extends CompilerExtension
 			/** @var ServiceDefinition $service */
 			$service->addSetup('setLogger', ['@' . $this->prefix('logger')]);
 		}
+
+		if(!empty($this->config->errorHandler->handlers)){
+			$errorHadlerDefinition = $builder
+				->addDefinition($this->prefix('errorHandler'))
+				->setFactory(
+					ErrorHandler::class,
+					['logger' => '@' . $this->prefix('logger')]
+				);
+
+			if(in_array(self::ERROR_HANDLER, $this->config->errorHandler->handlers, true)){
+				$errorHadlerDefinition->addSetup(
+					'registerErrorHandler', 
+					[
+						'errorTypes' => $this->config->errorHandler->errorTypes,
+						'handleOnlyReportedErrors' => $this->config->errorHandler->handleOnlyReportedErrors
+					]
+				);
+			}
+			if(in_array(self::EXCEPTION_HANDLER, $this->config->errorHandler->handlers, true)){
+				$errorHadlerDefinition->addSetup('registerExceptionHandler');
+			}
+			if(in_array(self::FATAL_HANDLER, $this->config->errorHandler->handlers, true)){
+				$errorHadlerDefinition->addSetup('registerFatalHandler');
+			}
+		}
+
 	}
 
 	public function afterCompile(ClassType $class): void
@@ -216,6 +254,11 @@ class MonologExtension extends CompilerExtension
 
 		if (Debugger::$logDirectory === null) {
 			$initialize->addBody('?::$logDirectory = ?;', [new PhpLiteral(Debugger::class), $this->config->logDir]);
+		}
+
+
+		if(!empty($this->config->errorHandler->handlers)){
+			$initialize->addBody('$this->getService(?);', [$this->prefix('errorHandler')]);
 		}
 
 		$initialize->addBody("// monolog\n($closure)();");
