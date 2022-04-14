@@ -39,17 +39,16 @@ use Tracy\ILogger;
  */
 class MonologExtension extends CompilerExtension
 {
+	private const
+		EXCEPTION_HANDLER = 'exception',
+		ERROR_HANDLER = 'error',
+		FATAL_HANDLER = 'fatal';
+
 	/** @var PriorityDefinition[] */
 	private array $handlers = [];
 
 	/** @var PriorityDefinition[] */
 	private array $processors = [];
-
-	private const EXCEPTION_HANDLER = 'exception';
-
-	private const ERROR_HANDLER = 'error';
-
-	private const FATAL_HANDLER = 'fatal';
 
 	public static function register(Configurator $configurator): void
 	{
@@ -79,10 +78,12 @@ class MonologExtension extends CompilerExtension
 			'registerFallback' => Expect::bool(false)->deprecated(),
 			'accessPriority' => Expect::string(ILogger::INFO),
 			'errorHandler' => Expect::structure([
-				'handlers' => Expect::arrayOf(Expect::string()),
-				'handleOnlyReportedErrors' => Expect::bool(true),
+				'handlers' => Expect::arrayOf(
+					Expect::anyOf(self::ERROR_HANDLER, self::EXCEPTION_HANDLER, self::FATAL_HANDLER)
+				),
+				'reportedOnly' => Expect::bool(true),
 				'errorTypes' => Expect::int(-1),
-			]),
+			])->required(false),
 		]);
 	}
 
@@ -211,31 +212,28 @@ class MonologExtension extends CompilerExtension
 			$service->addSetup('setLogger', ['@' . $this->prefix('logger')]);
 		}
 
-		if(!empty($this->config->errorHandler->handlers)){
-			$errorHadlerDefinition = $builder
-				->addDefinition($this->prefix('errorHandler'))
-				->setFactory(
-					ErrorHandler::class,
-					['logger' => '@' . $this->prefix('logger')]
-				);
+		if ($this->config->errorHandler) {
+			$errorHandlerDefinition = $builder
+				->addDefinition(($this->prefix('errorHandler')))
+			    ->setFactory(ErrorHandler::class, ['logger' => '@' . $this->prefix('logger')])
+				->setAutowired(false);
 
 			if(in_array(self::ERROR_HANDLER, $this->config->errorHandler->handlers, true)){
-				$errorHadlerDefinition->addSetup(
-					'registerErrorHandler', 
+				$errorHandlerDefinition->addSetup(
+					'registerErrorHandler',
 					[
 						'errorTypes' => $this->config->errorHandler->errorTypes,
-						'handleOnlyReportedErrors' => $this->config->errorHandler->handleOnlyReportedErrors
+						'handleOnlyReportedErrors' => $this->config->errorHandler->reportedOnly
 					]
 				);
 			}
 			if(in_array(self::EXCEPTION_HANDLER, $this->config->errorHandler->handlers, true)){
-				$errorHadlerDefinition->addSetup('registerExceptionHandler');
+				$errorHandlerDefinition->addSetup('registerExceptionHandler');
 			}
 			if(in_array(self::FATAL_HANDLER, $this->config->errorHandler->handlers, true)){
-				$errorHadlerDefinition->addSetup('registerFatalHandler');
+				$errorHandlerDefinition->addSetup('registerFatalHandler');
 			}
 		}
-
 	}
 
 	public function afterCompile(ClassType $class): void

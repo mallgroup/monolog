@@ -2,5 +2,5 @@ monolog:
 	logDir: %tempDir%/log
 	errorHandler:
 		handlers: ['exception', 'error', 'fatal']
-		handleOnlyReportedErrors: false
+		reportedOnly: false
 		errorTypes: -1
