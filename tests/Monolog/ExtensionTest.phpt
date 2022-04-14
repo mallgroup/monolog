@@ -24,6 +24,7 @@ use Monolog\Processor\WebProcessor;
 use Nette\Configurator;
 use Tester\Assert;
 use Tracy\Debugger;
+use Tracy\ILogger;
 
 require_once __DIR__ . '/../bootstrap.php';
 
@@ -56,9 +57,7 @@ class ExtensionTest extends \Tester\TestCase
 
 	public function testFunctional(): void
 	{
-		foreach (array_merge(glob(TEMP_DIR . '/*.log'), glob(TEMP_DIR . '/*.html')) as $logFile) {
-			unlink($logFile);
-		}
+		$this->cleanUpTemp();
 
 		Debugger::$logDirectory = TEMP_DIR;
 
@@ -256,6 +255,53 @@ class ExtensionTest extends \Tester\TestCase
 
 			Assert::type(FallbackNetteHandler::class, array_shift($handlers));
 		}, E_USER_DEPRECATED);
+	}
+
+	public function testErrorHandler(): void
+	{
+		Assert::error(function() {
+			$this->cleanUpTemp();
+			$this->createContainer('errorHandler');
+
+			Debugger::log('tracy message 1');
+			trigger_error('Custom user Notice', E_USER_NOTICE);
+			@trigger_error('Custom user Notice suppressed', E_USER_NOTICE);
+			trigger_error('Custom user Deprecated', E_USER_DEPRECATED);
+			@trigger_error('Custom user Deprecated suppressed', E_USER_DEPRECATED);
+
+			trigger_error('Custom user Warning', E_USER_WARNING);
+			@trigger_error('Custom user Warning suppressed', E_USER_WARNING);
+
+			Debugger::log('tracy warning message', ILogger::WARNING);
+
+			Assert::match(
+				'[%a%] tracy message 1 {"at":"%a%"} []' . "\n" ,
+				file_get_contents(TEMP_DIR . '/log/info.log')
+			);
+	
+			Assert::match(
+				'[%a%] E_USER_NOTICE: Custom user Notice {%a%} []'. "\n".
+				'[%a%] E_USER_NOTICE: Custom user Notice suppressed {%a%} []'. "\n".
+				'[%a%] E_USER_DEPRECATED: Custom user Deprecated {%a%} []'. "\n".
+				'[%a%] E_USER_DEPRECATED: Custom user Deprecated suppressed {%a%} []'. "\n",
+				file_get_contents(TEMP_DIR . '/log/notice.log')
+			);
+
+			Assert::match(
+				'[%a%] E_USER_WARNING: Custom user Warning {%a%} []'. "\n".
+				'[%a%] E_USER_WARNING: Custom user Warning suppressed {%a%} []'. "\n".
+				'[%a%] tracy warning message {%a%} []'. "\n",
+				file_get_contents(TEMP_DIR . '/log/warning.log')
+			);
+		}, [E_USER_NOTICE, E_USER_DEPRECATED, E_USER_WARNING]);
+
+	}
+
+	private function cleanUpTemp(): void
+	{
+		foreach (array_merge(glob(TEMP_DIR . '/*.log'), glob(TEMP_DIR . '/*.html')) as $logFile) {
+			unlink($logFile);
+		}
 	}
 }
 

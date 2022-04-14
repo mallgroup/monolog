@@ -1,0 +1,6 @@
+monolog:
+	logDir: %tempDir%/log
+	errorHandler:
+		handlers: ['exception', 'error', 'fatal']
+		reportedOnly: false
+		errorTypes: -1
