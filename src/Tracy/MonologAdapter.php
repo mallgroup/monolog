@@ -37,17 +37,20 @@ class MonologAdapter extends Logger
 		self::CRITICAL => MonologLogger::CRITICAL,
 	];
 	private MonologLogger $monolog;
-	private BlueScreenRenderer $blueScreenRenderer;
+	private ?BlueScreenRenderer $blueScreenRenderer;
 	private string $accessPriority;
 
 	public function __construct(
 		MonologLogger $monolog,
-		BlueScreenRenderer $blueScreenRenderer,
+		?BlueScreenRenderer $blueScreenRenderer = NULL,
 		string $email = NULL,
 		string $accessPriority = self::INFO
 	)
 	{
-		parent::__construct($blueScreenRenderer->directory, $email);
+		parent::__construct(
+			$blueScreenRenderer->directory ?? null,
+			$email
+		);
 		$this->monolog = $monolog;
 		$this->blueScreenRenderer = $blueScreenRenderer;
 		$this->accessPriority = $accessPriority;
@@ -75,7 +78,7 @@ class MonologAdapter extends Logger
 			$context['exception'] = $message;
 		}
 
-		$exceptionFile = $message instanceof \Throwable ? $this->getExceptionFile($message) : NULL;
+		$exceptionFile = $message instanceof \Throwable && $this->blueScreenRenderer ? $this->getExceptionFile($message) : NULL;
 
 		if ($this->email !== NULL && $this->mailer !== NULL && in_array($level, [self::ERROR, self::EXCEPTION, self::CRITICAL], TRUE)) {
 			$this->sendEmail(implode(' ', [
