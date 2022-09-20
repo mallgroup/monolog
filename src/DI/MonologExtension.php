@@ -69,6 +69,7 @@ class MonologExtension extends CompilerExtension
 			'tracyDefinition' => Expect::string('tracy.logger'),
 			'tracyHook' => Expect::bool(true),
 			'tracyBaseUrl' => Expect::string(),
+			'tracyRenderException' => Expect::bool(true),
 			'usePriorityProcessor' => Expect::bool(true),
 			'fallback' => Expect::structure([
 				'register' => Expect::bool(false),
@@ -290,37 +291,41 @@ class MonologExtension extends CompilerExtension
 			->addDefinition($this->prefix('tracy'))
 			->setFactory(MonologAdapter::class, [
 				'monolog' => $this->prefix('@logger'),
-				'blueScreenRenderer' => $this->prefix('@blueScreenRenderer'),
+				'blueScreenRenderer' => $this->config->tracyRenderException
+					? $this->prefix('@blueScreenRenderer')
+					: null,
 				'email' => Debugger::$email,
 				'accessPriority' => $this->config->accessPriority,
 			])
 			->setAutowired(false);
 
-		$builder
-			->addDefinition($this->prefix('blueScreenRenderer'))
-			->setFactory(BlueScreenRenderer::class, [
-				'directory' => $this->config->logDir,
-			])
-			->setAutowired(false);
-
-		$this->processors[] = new PriorityDefinition(
+		if ($this->config->tracyRenderException) {
 			$builder
-				->addDefinition($this->prefix('processor.tracyException'))
-				->setFactory(TracyExceptionProcessor::class, [
-					'blueScreenRenderer' => $this->prefix('@blueScreenRenderer'),
-				]),
-			100
-		);
+				->addDefinition($this->prefix('blueScreenRenderer'))
+				->setFactory(BlueScreenRenderer::class, [
+					'directory' => $this->config->logDir,
+				])
+				->setAutowired(false);
 
-		if ($this->config->tracyBaseUrl) {
 			$this->processors[] = new PriorityDefinition(
 				$builder
-					->addDefinition($this->prefix('processor.tracyBaseUrl'))
-					->setFactory(TracyUrlProcessor::class, [
-						'baseUrl' => $this->config->tracyBaseUrl,
+					->addDefinition($this->prefix('processor.tracyException'))
+					->setFactory(TracyExceptionProcessor::class, [
 						'blueScreenRenderer' => $this->prefix('@blueScreenRenderer'),
 					]),
-				10);
+				100
+			);
+
+			if ($this->config->tracyBaseUrl) {
+				$this->processors[] = new PriorityDefinition(
+					$builder
+						->addDefinition($this->prefix('processor.tracyBaseUrl'))
+						->setFactory(TracyUrlProcessor::class, [
+							'baseUrl' => $this->config->tracyBaseUrl,
+							'blueScreenRenderer' => $this->prefix('@blueScreenRenderer'),
+						]),
+					10);
+			}
 		}
 
 		if ($this->config->tracyHook === true) {
