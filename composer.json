@@ -22,7 +22,7 @@
 		}
 	],
 	"require": {
-		"php": ">=7.4 <8.2",
+		"php": ">=7.4 <8.3",
 		"nette/di": "^3.0.7",
 		"nette/utils": "^3.0",
 		"monolog/monolog": "^2.7",
